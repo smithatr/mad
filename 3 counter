@@ -68,3 +68,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 }
+
+XML - 2 TEXT VIEW( COUNTER APPLICATION, COUNTER VALUE), 2 BUTTONS (START, STOP)
