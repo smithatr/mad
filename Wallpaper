@@ -68,3 +68,4 @@ public class MainActivity extends AppCompatActivity {
 }
 
 XML - 1 TEXT VIEW(change wallpaper) , 1 BUTTON (click to change the wallpaper)
+remember to change the ID of the button 
