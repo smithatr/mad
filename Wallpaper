@@ -1,71 +1,122 @@
-package com.example.myapplication;
+JAVA
+package com.example.wallpaper;
 
-import android.annotation.SuppressLint;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
 import android.app.WallpaperManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+
+import androidx.core.content.ContextCompat; // For ContextCompat.getDrawable
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
-    Button changewallpaper;
-    WallpaperManager wpm;
-    int id = 1;
-    Handler handler = new Handler(); // Handler to post to UI thread
 
-    @SuppressLint("MissingInflatedId")
+    Button wallpaperChange;
+    Timer mytimer;
+    WallpaperManager wpm;
+    int prev = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mytimer = new Timer();
         wpm = WallpaperManager.getInstance(this);
-        changewallpaper = findViewById(R.id.btn_click);
-        changewallpaper.setOnClickListener(view -> setWallpaper());
+
+        wallpaperChange = findViewById(R.id.button1);
+        wallpaperChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setWallpaper();
+            }
+        });
     }
 
     private void setWallpaper() {
-        handler.postDelayed(new Runnable() {
+        Toast.makeText(this, "Setting wallpaper, please wait.", Toast.LENGTH_LONG).show();
+
+        mytimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                // Set wallpaper based on id
-                Drawable drawable = null;
-                if (id == 1) {
+                // Get the drawable resource based on the current index
+                Drawable drawable;
+                if (prev == 1) {
                     drawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.one);
-                    id = 2;
-                } else if (id == 2) {
+                    prev = 2;
+                } else if (prev == 2) {
                     drawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.two);
-                    id = 3;
-                } else if (id == 3) {
+                    prev = 3;
+                } else if (prev == 3) {
                     drawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.three);
-                    id = 4;
-                } else if (id == 4) {
+                    prev = 4;
+                } else if (prev == 4) {
                     drawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.four);
-                    id = 1;
+                    prev = 5;
+                } else if (prev == 5) {
+                    drawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.five);
+                    prev = 1;
+                } else {
+                    return;
                 }
 
-                if (drawable != null) {
+                // Convert drawable to bitmap and set as wallpaper
+                if (drawable instanceof BitmapDrawable) {
                     Bitmap wallpaper = ((BitmapDrawable) drawable).getBitmap();
                     try {
-                        wpm.setBitmap(wallpaper);
-                        Toast.makeText(MainActivity.this, "Wallpaper Changed", Toast.LENGTH_SHORT).show();
-                    } catch (IOException e) {
+                        // Run wallpaper setting on the main thread
+                        new Handler(getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    wpm.setBitmap(wallpaper);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "Error setting wallpaper", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
-        }, 0);  // Immediately run the task
+        }, 0, 8000); // Set to change every 30 seconds
     }
 }
 
-XML - 1 TEXT VIEW(change wallpaper) , 1 BUTTON (click to change the wallpaper)
-remember to change the ID of the button 
+
+
+PERMISSION
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
+
+XML
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="167dp"
+        android:layout_marginRight="167dp"
+        android:layout_marginBottom="409dp"
+        android:text="CLICK HERE" />
+</RelativeLayout>
